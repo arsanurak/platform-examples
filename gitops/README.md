@@ -18,7 +18,7 @@ gitops/
 | `platform/karpenter-ec2nodeclass.yaml` | How Karpenter builds a node: role `stage-karpenter-node`, subnets and security group found by the `karpenter.sh/discovery: stage` tag, IMDSv2 only, encrypted disk. |
 | `platform/cluster-secret-store.yaml` | `aws-secrets-manager`: the one secret store, usable only from the domain namespaces. |
 | `platform/appproject.yaml` | Project `services`: this repo only, the domain namespaces only, and only the six kinds a service folder holds. |
-| `platform/applicationset.yaml` | A git directory generator over `gitops/*/*` (minus `platform/`): one app `<domain>-<service>` per folder, deployed into namespace `<domain>`. |
+| `platform/applicationset.yaml` | A git directory generator over `gitops/*/*` (`platform/` is flat, so it never matches): one app `<domain>-<service>` per folder, deployed into namespace `<domain>`. |
 | `<domain>/<service>/` | One service: `orders` and `billing`, each with `api`, `web` and `admin`. |
 
 ## Conventions
