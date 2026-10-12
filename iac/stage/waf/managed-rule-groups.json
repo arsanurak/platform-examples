@@ -1,0 +1,22 @@
+[
+  {
+    "name": "AWSManagedRulesCommonRuleSet",
+    "priority": 10,
+    "excluded_rules": []
+  },
+  {
+    "name": "AWSManagedRulesKnownBadInputsRuleSet",
+    "priority": 20,
+    "excluded_rules": []
+  },
+  {
+    "name": "AWSManagedRulesAmazonIpReputationList",
+    "priority": 30,
+    "excluded_rules": []
+  },
+  {
+    "name": "AWSManagedRulesSQLiRuleSet",
+    "priority": 40,
+    "excluded_rules": []
+  }
+]

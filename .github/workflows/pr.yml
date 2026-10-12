@@ -37,9 +37,6 @@ jobs:
       - name: Hook and script tests
         run: make test-hooks
 
-      - name: Generated GitOps files match gitops/waves.toml
-        run: make check-waves
-
       - name: Install check tools (pinned versions, checksums verified)
         run: make iac-tools
         env:
@@ -48,37 +45,5 @@ jobs:
       - name: IaC checks (fmt, validate, terraform test, tflint, trivy, checkov, policy tests)
         run: make test-iac
 
-      - name: GitOps manifests (kubeconform, Argo CD and Gateway API CRD schemas)
+      - name: GitOps manifests (kubeconform, Argo CD, Karpenter and External Secrets CRD schemas)
         run: make check-gitops
-
-      - name: Argo CD Helm values (helm template, then kubeconform)
-        run: make helm-template
-
-  # Opt-in: runs the IAM policy simulator matrix only when the repository sets
-  # the POLICY_SIMULATOR_ROLE_ARN variable. Without it the job is skipped, so
-  # missing credentials never fail CI. Never runs for pull requests from forks.
-  policy-simulator:
-    name: IAM policy simulator (opt-in)
-    if: vars.POLICY_SIMULATOR_ROLE_ARN != '' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
-        with:
-          terraform_version: "1.16.3"
-          terraform_wrapper: false
-
-      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
-        with:
-          role-to-assume: ${{ vars.POLICY_SIMULATOR_ROLE_ARN }}
-          aws-region: eu-west-1
-
-      - name: Simulate the guardrails
-        run: make simulate-policies

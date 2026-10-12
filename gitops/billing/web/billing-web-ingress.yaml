@@ -1,0 +1,36 @@
+# Served by the AWS Load Balancer Controller. Every public service joins the
+# stage-public group, so they share one internet-facing ALB behind the WAF ACL.
+# The controller finds the *.stage.example.com certificate in ACM from the TLS
+# host, so no certificate ARN lives in git.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: billing-web
+  namespace: billing
+  labels:
+    app.kubernetes.io/name: billing-web
+    app.kubernetes.io/part-of: billing
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/group.name: stage-public
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS13-1-2-2021-06
+    alb.ingress.kubernetes.io/healthcheck-path: /readyz
+    alb.ingress.kubernetes.io/wafv2-acl-arn: arn:aws:wafv2:eu-west-1:000000000000:regional/webacl/stage/00000000-0000-0000-0000-000000000000
+spec:
+  ingressClassName: alb
+  tls:
+    - hosts:
+        - billing-web.stage.example.com
+  rules:
+    - host: billing-web.stage.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: billing-web
+                port:
+                  name: http

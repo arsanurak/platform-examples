@@ -1,0 +1,17 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenyPaymentMethodChanges",
+      "Effect": "Deny",
+      "Action": [
+        "aws-portal:ModifyPaymentMethods",
+        "payments:CreatePaymentInstrument",
+        "payments:DeletePaymentInstrument",
+        "payments:MakePayment",
+        "payments:UpdatePaymentPreferences"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

@@ -9,7 +9,7 @@ def guard(command):
 
 class ClusterWritesTest(unittest.TestCase):
     def test_blocks_kubectl_apply(self):
-        code, stderr = guard("kubectl apply -f gitops/apps/app01.yaml")
+        code, stderr = guard("kubectl apply -f gitops/orders/api/orders-api-deployment.yaml")
         self.assertEqual(code, BLOCKED)
         self.assertIn("Command guard", stderr)
 
@@ -18,19 +18,19 @@ class ClusterWritesTest(unittest.TestCase):
         self.assertEqual(code, ALLOWED)
 
     def test_blocks_a_cluster_write_hidden_in_a_chain(self):
-        code, _ = guard("make check && sudo kubectl -n default delete deploy app01")
+        code, _ = guard("make check && sudo kubectl -n default delete deploy orders-api")
         self.assertEqual(code, BLOCKED)
 
     def test_blocks_a_cluster_write_inside_bash_dash_c(self):
-        code, _ = guard("bash -c 'kubectl scale deploy app01 --replicas=0'")
+        code, _ = guard("bash -c 'kubectl scale deploy orders-api --replicas=0'")
         self.assertEqual(code, BLOCKED)
 
     def test_blocks_a_cluster_write_inside_command_substitution(self):
-        code, _ = guard("echo $(kubectl patch svc app01 -p '{}')")
+        code, _ = guard("echo $(kubectl patch svc orders-api -p '{}')")
         self.assertEqual(code, BLOCKED)
 
     def test_allows_rollout_status(self):
-        code, _ = guard("kubectl rollout status deploy/app01")
+        code, _ = guard("kubectl rollout status deploy/orders-api")
         self.assertEqual(code, ALLOWED)
 
     def test_blocks_helm_install_and_allows_helm_template(self):
@@ -38,7 +38,7 @@ class ClusterWritesTest(unittest.TestCase):
         self.assertEqual(guard("helm template argocd argo/argo-cd")[0], ALLOWED)
 
     def test_blocks_argocd_app_sync(self):
-        code, _ = guard("argocd app sync app01")
+        code, _ = guard("argocd app sync orders-api")
         self.assertEqual(code, BLOCKED)
 
     def test_blocks_kind_delete(self):
@@ -150,7 +150,7 @@ class EventHandlingTest(unittest.TestCase):
         self.assertIn("Command guard", stderr)
 
     def test_allows_the_make_targets(self):
-        for command in ("make check", "make up", "make wave-1", "make parity", "make down"):
+        for command in ("make check", "make test-iac", "make check-gitops", "make help"):
             with self.subTest(command=command):
                 self.assertEqual(guard(command)[0], ALLOWED)
 

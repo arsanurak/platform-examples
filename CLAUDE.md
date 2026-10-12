@@ -4,14 +4,14 @@ This repo is **public**. Everything you write here, including issues, commit mes
 
 ## Public-repo rules
 
-- Use generic names only: apps are `app01` to `app06`, clusters are `old` and `new`.
+- Use generic names only: domains are `orders` and `billing`, services are `api`, `web` and `admin`, the environment is `stage`.
 - Use placeholders for every account ID, domain, hostname, email and name (`000000000000`, `example.com`, `<placeholder>`).
 - Never mention a real company, team, customer, partner or internal system, and never paste code or text from another repo. Write every file fresh.
 - Never commit secrets, even fake ones that look real. Tests build fake secrets at runtime from fragments.
 
 ## How to work
 
-- The `make` targets are the interface. Run, test and document the demo through them only (see `Makefile`).
+- The `make` targets are the interface. Run, test and document the repo through them only (see `Makefile`).
 - Before finishing a change, run `make check` (the same static checks the PR workflow runs).
 - Pin every GitHub Action to a full commit SHA with a `# vX.Y.Z` comment. `make check-actions` enforces this.
 - Write tests first for hooks and scripts, and test them through their command-line interface.

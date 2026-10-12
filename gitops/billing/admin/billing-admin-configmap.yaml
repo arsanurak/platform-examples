@@ -1,0 +1,12 @@
+# Settings that are safe to read in git. Credentials go in the ExternalSecret.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: billing-admin
+  namespace: billing
+  labels:
+    app.kubernetes.io/name: billing-admin
+    app.kubernetes.io/part-of: billing
+data:
+  PODINFO_UI_MESSAGE: billing-admin
+  PODINFO_LEVEL: info

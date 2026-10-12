@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # kubeconform with every schema source pinned to a commit, so a check that
 # passes today passes tomorrow. Arguments are passed through (files, dirs, -).
-#   built-in kinds  yannh/kubernetes-json-schema, for the kind node's Kubernetes version
-#   CRDs            datreeio/CRDs-catalog (Argo CD, Gateway API, ...)
+#   built-in kinds  yannh/kubernetes-json-schema, for the cluster's Kubernetes version
+#   CRDs            datreeio/CRDs-catalog (Argo CD, Karpenter, External Secrets, ...)
 # No -ignore-missing-schemas: a kind with no schema fails the check.
 # kustomization.yaml files are Kustomize input, not Kubernetes objects, so skipped.
 set -euo pipefail

@@ -1,0 +1,35 @@
+# Served by the AWS Load Balancer Controller. Admin tools are reachable only
+# from inside the VPC: every internal service joins the stage-internal group,
+# so they share one internal ALB. The controller finds the
+# *.stage.example.com certificate in ACM from the TLS host.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: orders-admin
+  namespace: orders
+  labels:
+    app.kubernetes.io/name: orders-admin
+    app.kubernetes.io/part-of: orders
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internal
+    alb.ingress.kubernetes.io/group.name: stage-internal
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS13-1-2-2021-06
+    alb.ingress.kubernetes.io/healthcheck-path: /readyz
+spec:
+  ingressClassName: alb
+  tls:
+    - hosts:
+        - orders-admin.stage.example.com
+  rules:
+    - host: orders-admin.stage.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: orders-admin
+                port:
+                  name: http

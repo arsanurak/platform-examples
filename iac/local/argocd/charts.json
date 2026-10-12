@@ -1,5 +1,0 @@
-{
-  "repository": "https://argoproj.github.io/argo-helm",
-  "argo-cd": "10.9.6",
-  "argocd-apps": "2.0.6"
-}

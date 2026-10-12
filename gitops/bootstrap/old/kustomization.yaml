@@ -1,7 +1,0 @@
-# The root app renders this folder with Kustomize so it can set the git
-# revision the ApplicationSet tracks (`main` in the file; iac/local/argocd
-# patches it to GIT_REVISION, which CI sets to the commit under test).
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - applicationset.yaml
