@@ -1,0 +1,73 @@
+# billing-admin: podinfo standing in for the service. An internal tool with steady
+# load, so a fixed replica count and no HPA.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: billing-admin
+  namespace: billing
+  labels:
+    app.kubernetes.io/name: billing-admin
+    app.kubernetes.io/part-of: billing
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: billing-admin
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: billing-admin
+        app.kubernetes.io/part-of: billing
+    spec:
+      # The podinfo image's own user and group, as numbers so runAsNonRoot can check them.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 100
+        runAsGroup: 101
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: podinfo
+          image: ghcr.io/stefanprodan/podinfo:6.15.0@sha256:ec73780a8425f59ea49f5bc8cdff0d598805a224fbaa1f86c67a244f250fa9da
+          command:
+            - ./podinfo
+            - --port=9898
+            - --data-path=/data
+          # Plain settings from the ConfigMap, credentials from the Secret that
+          # the ExternalSecret writes.
+          envFrom:
+            - configMapRef:
+                name: billing-admin
+            - secretRef:
+                name: billing-admin
+          ports:
+            - name: http
+              containerPort: 9898
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+          securityContext:
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          # podinfo's only writable path; the root filesystem stays read-only.
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}
