@@ -1,0 +1,28 @@
+# How Karpenter builds a node: the node role from iac/stage/karpenter.tf, and
+# the private subnets and cluster security group tagged karpenter.sh/discovery.
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: general
+spec:
+  role: stage-karpenter-node
+  amiSelectorTerms:
+    - alias: al2023@latest
+  subnetSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: stage
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: stage
+  # IMDSv2 only, and out of reach of pods: they get AWS access through Pod Identity.
+  metadataOptions:
+    httpEndpoint: enabled
+    httpTokens: required
+    httpPutResponseHopLimit: 1
+  blockDeviceMappings:
+    - deviceName: /dev/xvda
+      ebs:
+        volumeSize: 40Gi
+        volumeType: gp3
+        encrypted: true
+        deleteOnTermination: true

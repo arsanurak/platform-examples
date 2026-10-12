@@ -4,7 +4,7 @@ Date: 2026-10-07
 
 ## Status
 
-Accepted
+Superseded by [ADR 3](0003-example-config-not-a-runnable-demo.md).
 
 ## Context
 

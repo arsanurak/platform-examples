@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: billing-admin
+  namespace: billing
+  labels:
+    app.kubernetes.io/name: billing-admin
+    app.kubernetes.io/part-of: billing
+spec:
+  selector:
+    app.kubernetes.io/name: billing-admin
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
