@@ -54,3 +54,11 @@ def test_only_pods_in_the_stage_cluster_can_assume_it(policy):
     stage = {"aws:SourceAccount": ACCOUNT, "aws:SourceArn": f"arn:aws:eks:{REGION}:{ACCOUNT}:cluster/stage"}
     assert evaluate(trust, "sts:AssumeRole", "*", stage) == ALLOWED
     assert evaluate(trust, "sts:AssumeRole", "*", {"aws:SourceAccount": ACCOUNT}) == IMPLICIT_DENY
+
+
+def test_it_creates_security_groups_only_with_its_cluster_tag(lbc):
+    vpc = f"arn:aws:ec2:{REGION}:{ACCOUNT}:vpc/vpc-0"
+    assert lbc("ec2:CreateSecurityGroup", SG, REQUEST_TAGGED) == ALLOWED
+    assert lbc("ec2:CreateSecurityGroup", SG) == IMPLICIT_DENY
+    # The VPC half of the call carries no request tags, as upstream allows.
+    assert lbc("ec2:CreateSecurityGroup", vpc) == ALLOWED

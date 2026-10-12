@@ -73,10 +73,18 @@
       "Sid": "CreateSecurityGroupsInTheVpc",
       "Effect": "Allow",
       "Action": "ec2:CreateSecurityGroup",
-      "Resource": [
-        "arn:aws:ec2:eu-west-1:000000000000:vpc/*",
-        "arn:aws:ec2:eu-west-1:000000000000:security-group/*"
-      ]
+      "Resource": "arn:aws:ec2:eu-west-1:000000000000:vpc/*"
+    },
+    {
+      "Sid": "CreateSecurityGroupsOnlyWithItsClusterTag",
+      "Effect": "Allow",
+      "Action": "ec2:CreateSecurityGroup",
+      "Resource": "arn:aws:ec2:eu-west-1:000000000000:security-group/*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/elbv2.k8s.aws/cluster": "stage"
+        }
+      }
     },
     {
       "Sid": "TagSecurityGroupsItCreates",
