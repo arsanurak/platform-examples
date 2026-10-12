@@ -150,7 +150,7 @@ class EventHandlingTest(unittest.TestCase):
         self.assertIn("Command guard", stderr)
 
     def test_allows_the_make_targets(self):
-        for command in ("make check", "make up", "make wave-1", "make parity", "make down"):
+        for command in ("make check", "make test-iac", "make check-gitops", "make help"):
             with self.subTest(command=command):
                 self.assertEqual(guard(command)[0], ALLOWED)
 
