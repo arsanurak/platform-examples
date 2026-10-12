@@ -1,0 +1,239 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "LaunchFromSharedResources",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:RunInstances",
+        "ec2:CreateFleet"
+      ],
+      "Resource": [
+        "arn:aws:ec2:eu-west-1::image/*",
+        "arn:aws:ec2:eu-west-1::snapshot/*",
+        "arn:aws:ec2:eu-west-1:*:security-group/*",
+        "arn:aws:ec2:eu-west-1:*:subnet/*",
+        "arn:aws:ec2:eu-west-1:*:capacity-reservation/*"
+      ]
+    },
+    {
+      "Sid": "LaunchFromItsOwnLaunchTemplates",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:RunInstances",
+        "ec2:CreateFleet"
+      ],
+      "Resource": "arn:aws:ec2:eu-west-1:*:launch-template/*",
+      "Condition": {
+        "StringEquals": {
+          "aws:ResourceTag/kubernetes.io/cluster/stage": "owned"
+        },
+        "StringLike": {
+          "aws:ResourceTag/karpenter.sh/nodepool": "*"
+        }
+      }
+    },
+    {
+      "Sid": "CreateOnlyResourcesTaggedForTheCluster",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:RunInstances",
+        "ec2:CreateFleet",
+        "ec2:CreateLaunchTemplate"
+      ],
+      "Resource": [
+        "arn:aws:ec2:eu-west-1:*:fleet/*",
+        "arn:aws:ec2:eu-west-1:*:instance/*",
+        "arn:aws:ec2:eu-west-1:*:volume/*",
+        "arn:aws:ec2:eu-west-1:*:network-interface/*",
+        "arn:aws:ec2:eu-west-1:*:launch-template/*",
+        "arn:aws:ec2:eu-west-1:*:spot-instances-request/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/kubernetes.io/cluster/stage": "owned",
+          "aws:RequestTag/eks:eks-cluster-name": "stage"
+        },
+        "StringLike": {
+          "aws:RequestTag/karpenter.sh/nodepool": "*"
+        }
+      }
+    },
+    {
+      "Sid": "TagWhatItCreates",
+      "Effect": "Allow",
+      "Action": "ec2:CreateTags",
+      "Resource": [
+        "arn:aws:ec2:eu-west-1:*:fleet/*",
+        "arn:aws:ec2:eu-west-1:*:instance/*",
+        "arn:aws:ec2:eu-west-1:*:volume/*",
+        "arn:aws:ec2:eu-west-1:*:network-interface/*",
+        "arn:aws:ec2:eu-west-1:*:launch-template/*",
+        "arn:aws:ec2:eu-west-1:*:spot-instances-request/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/kubernetes.io/cluster/stage": "owned",
+          "aws:RequestTag/eks:eks-cluster-name": "stage",
+          "ec2:CreateAction": [
+            "RunInstances",
+            "CreateFleet",
+            "CreateLaunchTemplate"
+          ]
+        },
+        "StringLike": {
+          "aws:RequestTag/karpenter.sh/nodepool": "*"
+        }
+      }
+    },
+    {
+      "Sid": "TagItsOwnNodes",
+      "Effect": "Allow",
+      "Action": "ec2:CreateTags",
+      "Resource": "arn:aws:ec2:eu-west-1:*:instance/*",
+      "Condition": {
+        "StringEquals": {
+          "aws:ResourceTag/kubernetes.io/cluster/stage": "owned"
+        },
+        "StringLike": {
+          "aws:ResourceTag/karpenter.sh/nodepool": "*"
+        },
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "eks:eks-cluster-name",
+            "karpenter.sh/nodeclaim",
+            "Name"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "RemoveItsOwnNodes",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:TerminateInstances",
+        "ec2:DeleteLaunchTemplate"
+      ],
+      "Resource": [
+        "arn:aws:ec2:eu-west-1:*:instance/*",
+        "arn:aws:ec2:eu-west-1:*:launch-template/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:ResourceTag/kubernetes.io/cluster/stage": "owned"
+        },
+        "StringLike": {
+          "aws:ResourceTag/karpenter.sh/nodepool": "*"
+        }
+      }
+    },
+    {
+      "Sid": "ReadEc2InTheRegion",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeAvailabilityZones",
+        "ec2:DescribeCapacityReservations",
+        "ec2:DescribeImages",
+        "ec2:DescribeInstances",
+        "ec2:DescribeInstanceTypeOfferings",
+        "ec2:DescribeInstanceTypes",
+        "ec2:DescribeLaunchTemplates",
+        "ec2:DescribeSecurityGroups",
+        "ec2:DescribeSpotPriceHistory",
+        "ec2:DescribeSubnets"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "eu-west-1"
+        }
+      }
+    },
+    {
+      "Sid": "ReadPublicAmiParameters",
+      "Effect": "Allow",
+      "Action": "ssm:GetParameter",
+      "Resource": "arn:aws:ssm:eu-west-1::parameter/aws/service/*"
+    },
+    {
+      "Sid": "ReadPrices",
+      "Effect": "Allow",
+      "Action": "pricing:GetProducts",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ReadTheInterruptionQueue",
+      "Effect": "Allow",
+      "Action": [
+        "sqs:DeleteMessage",
+        "sqs:GetQueueUrl",
+        "sqs:ReceiveMessage"
+      ],
+      "Resource": "arn:aws:sqs:eu-west-1:000000000000:stage-karpenter"
+    },
+    {
+      "Sid": "PassTheNodeRoleToEc2",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": "arn:aws:iam::000000000000:role/workload/stage-karpenter-node",
+      "Condition": {
+        "StringEquals": {
+          "iam:PassedToService": "ec2.amazonaws.com"
+        }
+      }
+    },
+    {
+      "Sid": "CreateInstanceProfilesTaggedForTheCluster",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateInstanceProfile",
+        "iam:TagInstanceProfile"
+      ],
+      "Resource": "arn:aws:iam::000000000000:instance-profile/*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/kubernetes.io/cluster/stage": "owned",
+          "aws:RequestTag/eks:eks-cluster-name": "stage",
+          "aws:RequestTag/topology.kubernetes.io/region": "eu-west-1"
+        },
+        "StringLike": {
+          "aws:RequestTag/karpenter.k8s.aws/ec2nodeclass": "*"
+        }
+      }
+    },
+    {
+      "Sid": "ManageItsOwnInstanceProfiles",
+      "Effect": "Allow",
+      "Action": [
+        "iam:AddRoleToInstanceProfile",
+        "iam:RemoveRoleFromInstanceProfile",
+        "iam:DeleteInstanceProfile"
+      ],
+      "Resource": "arn:aws:iam::000000000000:instance-profile/*",
+      "Condition": {
+        "StringEquals": {
+          "aws:ResourceTag/kubernetes.io/cluster/stage": "owned",
+          "aws:ResourceTag/topology.kubernetes.io/region": "eu-west-1"
+        },
+        "StringLike": {
+          "aws:ResourceTag/karpenter.k8s.aws/ec2nodeclass": "*"
+        }
+      }
+    },
+    {
+      "Sid": "ReadInstanceProfiles",
+      "Effect": "Allow",
+      "Action": [
+        "iam:GetInstanceProfile",
+        "iam:ListInstanceProfiles"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "FindTheApiServer",
+      "Effect": "Allow",
+      "Action": "eks:DescribeCluster",
+      "Resource": "arn:aws:eks:eu-west-1:000000000000:cluster/stage"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "name": "rate-limit-per-ip",
+  "priority": 1,
+  "limit": 1000,
+  "evaluation_window_sec": 300
+}
