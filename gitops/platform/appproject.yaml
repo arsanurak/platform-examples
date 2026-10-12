@@ -1,0 +1,30 @@
+# What a service app may do: deploy from this repo into a domain namespace, and
+# create only the six kinds a service folder holds. No cluster-scoped kinds.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: services
+  namespace: argocd
+spec:
+  description: Domain services generated from gitops/<domain>/<service>/
+  sourceRepos:
+    - https://github.com/arsanurak/platform-examples.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: orders
+    - server: https://kubernetes.default.svc
+      namespace: billing
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - group: apps
+      kind: Deployment
+    - group: ""
+      kind: Service
+    - group: networking.k8s.io
+      kind: Ingress
+    - group: autoscaling
+      kind: HorizontalPodAutoscaler
+    - group: ""
+      kind: ConfigMap
+    - group: external-secrets.io
+      kind: ExternalSecret
