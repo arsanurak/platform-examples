@@ -3,6 +3,10 @@
 # organization SCP. A human admin applies these resources; the Guardrail
 # policy stops CI changing them afterwards. Every document is the literal
 # JSON under iam/, which the pytest suite there tests.
+#
+# All of this is account-level, with fixed platform-* names. A second
+# environment in the same account does not copy this file; its root reuses the
+# platform-boundary ARN for its workload roles.
 
 # GitHub's OIDC issuer. CI exchanges a short-lived GitHub token for role
 # credentials, so no access key for the Execution role ever exists.
