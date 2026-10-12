@@ -71,18 +71,10 @@ trivy: iac-tools ## Scan iac/ for misconfigurations with trivy
 checkov: iac-tools ## Scan iac/ for misconfigurations with checkov
 	$(TOOLS)/venv/bin/checkov --directory iac --framework terraform --quiet --compact
 
-render-policies: ## Render the guardrail policies to build/guardrails.json
-	@mkdir -p build
-	iac/policy_checks/render-policies.sh $(RENDERED)
-
-test-policies: iac-tools render-policies ## Check the guardrail properties on the rendered policy JSON
-	$(PYTHON) iac/policy_checks/check_policies.py $(RENDERED)
-	$(TOOLS)/venv/bin/pytest iac/policy_checks
+test-policies: iac-tools ## Test the IAM policy JSON under iac/stage/iam with pytest
+	$(TOOLS)/venv/bin/pytest iac/stage/iam
 
 test-iac: fmt-check validate test-tf tflint trivy checkov test-policies ## Run every IaC check, with no cloud credentials
-
-simulate-policies: render-policies ## Opt-in: run the IAM policy simulator matrix (skips without AWS credentials)
-	$(PYTHON) iac/policy_checks/simulate_policies.py $(RENDERED)
 
 check-gitops: iac-tools ## Validate every manifest under gitops/ with kubeconform, CRD schemas included
 	scripts/check-gitops.sh gitops tests/fixtures/gitops-invalid
