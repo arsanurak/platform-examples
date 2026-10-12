@@ -43,12 +43,15 @@ resource "aws_iam_role" "karpenter_node" {
   })
 }
 
+# The same managed policies as the system nodes. AmazonSSMManagedInstanceCore
+# is left off on purpose: nobody shells into nodes (they are replaced, not
+# repaired), and leaving it off keeps the SSM agent's ssm:*, ssmmessages:* and
+# ec2messages:* calls out of the Permission boundary.
 resource "aws_iam_role_policy_attachment" "karpenter_node" {
   for_each = toset([
     "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
     "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
     "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPullOnly",
-    "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
   ])
 
   role       = aws_iam_role.karpenter_node.name

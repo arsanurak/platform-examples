@@ -115,3 +115,82 @@ def test_the_boundary_allows_every_controller_action(component):
                 if evaluate([boundary], action, resource, condition_context(statement)) != ALLOWED:
                     gaps.append(f"{action} on {resource}")
     assert not gaps, f"the boundary blocks what {component} needs: {gaps}"
+
+
+# Key actions each AWS managed policy attached to a workload role needs, written
+# out by hand from the AWS managed policy reference. These roles carry the
+# boundary too, so a managed policy grants nothing the boundary does not allow.
+# Each entry is (action, resource, extra request context).
+SERVICE_LINKED_ROLE = (
+    f"arn:aws:iam::{ACCOUNT}:role/aws-service-role/elasticloadbalancing.amazonaws.com/"
+    "AWSServiceRoleForElasticLoadBalancing"
+)
+MANAGED_POLICY_NEEDS = {
+    "AmazonEKSWorkerNodePolicy": [
+        ("ec2:DescribeInstances", "*", {}),
+        ("ec2:DescribeSubnets", "*", {}),
+        ("eks:DescribeCluster", "*", {}),
+        ("eks-auth:AssumeRoleForPodIdentity", "*", {}),
+    ],
+    "AmazonEKS_CNI_Policy": [
+        ("ec2:AssignPrivateIpAddresses", "*", {}),
+        ("ec2:CreateNetworkInterface", "*", {}),
+        ("ec2:AttachNetworkInterface", "*", {}),
+        ("ec2:DeleteNetworkInterface", "*", {}),
+        ("ec2:CreateTags", "*", {}),
+    ],
+    "AmazonEC2ContainerRegistryPullOnly": [
+        ("ecr:GetAuthorizationToken", "*", {}),
+        ("ecr:BatchGetImage", "*", {}),
+        ("ecr:GetDownloadUrlForLayer", "*", {}),
+        ("ecr:BatchCheckLayerAvailability", "*", {}),
+        ("ecr:BatchImportUpstreamImage", "*", {}),
+    ],
+    "AmazonEKSClusterPolicy": [
+        ("autoscaling:DescribeAutoScalingGroups", "*", {}),
+        ("autoscaling:UpdateAutoScalingGroup", "*", {}),
+        ("ec2:CreateSecurityGroup", "*", {}),
+        ("elasticloadbalancing:CreateLoadBalancer", "*", {}),
+        ("kms:DescribeKey", "*", {}),
+        (
+            "iam:CreateServiceLinkedRole",
+            SERVICE_LINKED_ROLE,
+            {"iam:AWSServiceName": "elasticloadbalancing.amazonaws.com"},
+        ),
+    ],
+}
+
+# Which managed policies each workload role has attached, by .tf file.
+ROLE_ATTACHMENTS = {
+    "system node role (node-group.tf)": (
+        "node-group.tf",
+        ["AmazonEKSWorkerNodePolicy", "AmazonEKS_CNI_Policy", "AmazonEC2ContainerRegistryPullOnly"],
+    ),
+    "Karpenter node role (karpenter.tf)": (
+        "karpenter.tf",
+        ["AmazonEKSWorkerNodePolicy", "AmazonEKS_CNI_Policy", "AmazonEC2ContainerRegistryPullOnly"],
+    ),
+    "cluster role (eks.tf)": ("eks.tf", ["AmazonEKSClusterPolicy"]),
+}
+
+
+@pytest.mark.parametrize("role", ROLE_ATTACHMENTS)
+def test_every_attached_managed_policy_has_its_needs_listed(role):
+    """A managed policy attached in Terraform but missing above would go unchecked."""
+    tf_file, expected = ROLE_ATTACHMENTS[role]
+    attached = re.findall(r'"arn:aws:iam::aws:policy/([A-Za-z0-9_]+)"', (STAGE / tf_file).read_text())
+    assert sorted(attached) == sorted(expected), f"{tf_file} attaches {attached}; update ROLE_ATTACHMENTS"
+    assert set(attached) <= set(MANAGED_POLICY_NEEDS), f"no needs listed for {set(attached) - set(MANAGED_POLICY_NEEDS)}"
+
+
+@pytest.mark.parametrize("role", ROLE_ATTACHMENTS)
+def test_the_boundary_allows_what_each_attached_managed_policy_needs(role):
+    boundary = load("permission-boundary")
+    _, attached = ROLE_ATTACHMENTS[role]
+    gaps = []
+    for managed in attached:
+        for action, resource, extra in MANAGED_POLICY_NEEDS[managed]:
+            context = {"aws:RequestedRegion": REGION, **extra}
+            if evaluate([boundary], action, resource, context) != ALLOWED:
+                gaps.append(f"{managed}: {action} on {resource}")
+    assert not gaps, f"the boundary blocks what the {role} needs: {gaps}"

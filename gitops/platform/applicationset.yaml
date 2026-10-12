@@ -14,9 +14,8 @@ spec:
         repoURL: https://github.com/arsanurak/platform-examples.git
         revision: main
         directories:
+          # platform/ is flat on purpose: it has no subfolders, so gitops/*/* never matches it.
           - path: gitops/*/*
-          - path: gitops/platform/*
-            exclude: true
   template:
     metadata:
       name: "{{ index .path.segments 1 }}-{{ .path.basename }}"
