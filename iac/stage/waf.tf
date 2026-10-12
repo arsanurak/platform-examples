@@ -7,8 +7,9 @@ locals {
   waf_managed_rule_groups = jsondecode(file("${path.module}/waf/managed-rule-groups.json"))
   waf_rate_limit          = jsondecode(file("${path.module}/waf/rate-limit.json"))
 }
-
 resource "aws_wafv2_web_acl" "this" {
+  #checkov:skip=CKV_AWS_192:AWSManagedRulesKnownBadInputsRuleSet (Log4j) comes from waf/managed-rule-groups.json through a dynamic block checkov cannot read; tests/edge.tftest.hcl asserts it is on.
+
   name  = var.environment
   scope = "REGIONAL"
 

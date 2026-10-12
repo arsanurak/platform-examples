@@ -1,7 +1,8 @@
 # One wildcard certificate for every service host. The load balancer
 # controller finds it in ACM by the Ingress host, so no ARN is in git.
-
 resource "aws_acm_certificate" "wildcard" {
+  #checkov:skip=CKV2_AWS_71:One wildcard for <domain>-<service>.stage.example.com is the convention: adding a service needs no new certificate.
+
   domain_name       = "*.${var.dns_zone}"
   validation_method = "DNS"
 

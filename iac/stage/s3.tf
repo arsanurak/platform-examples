@@ -2,10 +2,13 @@
 # encrypted with the environment's key, closed to the public and refuses
 # requests without TLS.
 
-#checkov:skip=CKV_AWS_18:Access logging needs a separate log bucket; CloudTrail data events are the audit trail in this example.
-#checkov:skip=CKV_AWS_144:Cross-region replication is a disaster-recovery choice this one-region example does not make.
-#checkov:skip=CKV2_AWS_62:Nothing consumes bucket events in this example.
+# trivy flags the same missing access log as checkov's CKV_AWS_18: see the reason inside.
+#trivy:ignore:AWS-0089
 resource "aws_s3_bucket" "domain" {
+  #checkov:skip=CKV_AWS_18:Access logs need a separate log bucket, left out to keep the example small.
+  #checkov:skip=CKV_AWS_144:Cross-region replication is a disaster-recovery choice this one-region example does not make.
+  #checkov:skip=CKV2_AWS_62:Nothing consumes bucket events in this example.
+
   for_each = var.domains
 
   bucket = "example-${var.environment}-${each.key}-000000000000"

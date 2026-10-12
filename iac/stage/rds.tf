@@ -9,8 +9,9 @@ resource "aws_db_subnet_group" "domain" {
   name       = "${var.environment}-${each.key}"
   subnet_ids = aws_subnet.private[*].id
 }
-
 resource "aws_security_group" "database" {
+  #checkov:skip=CKV2_AWS_5:Attached to aws_db_instance.domain through vpc_security_group_ids; checkov does not follow the for_each reference.
+
   for_each = var.domains
 
   name        = "${var.environment}-${each.key}-database"
@@ -51,8 +52,9 @@ resource "aws_db_parameter_group" "postgres" {
   }
 }
 
-#checkov:skip=CKV_AWS_118:Enhanced monitoring needs one more role passed to RDS; Performance Insights and the exported logs cover this example.
 resource "aws_db_instance" "domain" {
+  #checkov:skip=CKV_AWS_118:Enhanced monitoring needs one more role passed to RDS; Performance Insights and the exported logs cover this example.
+
   for_each = var.domains
 
   identifier     = "${var.environment}-${each.key}"
