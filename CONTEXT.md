@@ -1,37 +1,29 @@
 # platform-demo
 
-A public, runnable demo of three platform-engineering patterns: migrating apps between Kubernetes clusters in waves, a CI identity that can't loosen its own guardrails, and agent-assisted delivery. Everything runs free on a laptop; cloud parts are written and checked but never applied.
+Public example configuration in a house style: how Terraform and GitOps files for an EKS platform are laid out, named and checked. Nothing here is applied or run; CI proves it statically.
 
 ## Language
 
-### Migration
+### Layout
 
-**Old cluster**:
-The local kind cluster the apps start on. It plays the platform being migrated away from.
-_Avoid_: source, legacy, blue
+**Environment**:
+One deployment of the platform, with its own Terraform root under `iac/` and its own cluster. This repo has one, `stage`.
+_Avoid_: stage (as a verb), tier
 
-**New cluster**:
-The local kind cluster the apps move to.
-_Avoid_: target, green
+**Concern**:
+One piece of infrastructure in a Terraform root (the VPC, the cluster, Karpenter, the WAF, ...). Each concern has exactly one `.tf` file, named after it.
+_Avoid_: module, layer
 
-**App**:
-One of the sample workloads `app01` to `app06`, each a podinfo instance. `app05` calls `app04`, which gives the waves a real dependency.
-_Avoid_: service, microservice
+**Component**:
+One IAM role or policy, with a folder under `iac/stage/iam/` holding its JSON and its policy tests.
 
-**Wave**:
-An ordered batch of **Apps** moved from the **Old cluster** to the **New cluster** together. Waves are generated from one definition of membership and order, never edited by hand.
-_Avoid_: batch, phase, stage
+**Domain**:
+A business area that owns services and gets its own namespace: `orders` and `billing`.
+_Avoid_: team, tenant
 
-**Parity check**:
-A comparison of each **App** on the **Old cluster** and the **New cluster**: HTTP status, a chosen set of headers, and the JSON shape (keys and types, not values). Any difference fails it.
-_Avoid_: smoke test, diff
-
-**Cutover**:
-Switching routing for a **Wave**'s **Apps** to the **New cluster**, then scaling the old copies to zero replicas while keeping their definitions. It prints its plan before acting.
-_Avoid_: switchover, go-live
-
-**Rollback**:
-Restoring the old copies' replicas and routing after a **Cutover**.
+**Service**:
+One deployable inside a **Domain**: `api`, `web` or `admin`. Its manifests live in `gitops/<domain>/<service>/`, one file per kind, named `<domain>-<service>-<kind>.yaml`.
+_Avoid_: app, microservice
 
 ### Guardrails
 
@@ -40,7 +32,7 @@ The cloud identity CI assumes through OIDC to apply infrastructure. It holds no 
 _Avoid_: CI user, deploy user
 
 **Permission boundary**:
-The policy that caps what the **Execution role** can ever do, whatever its own policies grant.
+The policy that caps what the **Execution role** and every workload role can ever do, whatever their own policies grant.
 
 **Guardrail policy**:
 A deny policy that holds even against the **Execution role**: it can't edit itself or its **Permission boundary**, and it can't touch payment methods.
@@ -51,10 +43,10 @@ A deny policy that holds even against the **Execution role**: it can't edit itse
 The `iac/` folder: Terraform roots and modules.
 
 **GitOps area**:
-The `gitops/` folder: Argo CD applications and ApplicationSets that Argo CD syncs onto the clusters.
+The `gitops/` folder: the manifests Argo CD would sync, one folder per **Service** plus `gitops/platform/`.
 
 **Make target**:
-A `make` entry point (`make up`, `make wave-1`, `make parity`, ...). It is the only interface: the README, CI and tests all go through it.
+A `make` entry point (`make check`, `make test-iac`, `make check-gitops`, ...). It is the only interface: the README, CI and tests all go through it.
 _Avoid_: script, task
 
 ### Agent workflow
@@ -69,10 +61,10 @@ The **Hook** that blocks writing secret-shaped values (cloud keys, tokens, priva
 The **Hook** that blocks shell commands that write to a cluster or cloud, destroy data, or send data out of the machine.
 
 **Map**:
-The parent issue that lists every ticket for the demo and how they block each other.
+The parent issue that lists every ticket for a piece of work and how they block each other.
 
 ## Relationships
 
-- A **Wave** holds one or more **Apps**; an **App** belongs to exactly one **Wave**.
-- A **Cutover** applies to one **Wave** and should follow a passing **Parity check**.
-- The **Permission boundary** caps the **Execution role**; **Guardrail policies** protect both.
+- A **Domain** holds one or more **Services**; each **Service** belongs to exactly one **Domain** and runs in its namespace.
+- An **Environment** is one Terraform root made of **Concerns**; IAM **Components** sit in its `iam/` folder.
+- The **Permission boundary** caps the **Execution role** and every workload role; **Guardrail policies** protect both.
