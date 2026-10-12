@@ -1,0 +1,10 @@
+# The billing domain's namespace. Every billing service runs here, under the
+# restricted Pod Security Standard.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: billing
+  labels:
+    app.kubernetes.io/part-of: billing
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted

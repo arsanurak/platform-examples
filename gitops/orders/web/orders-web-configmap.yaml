@@ -1,0 +1,12 @@
+# Settings that are safe to read in git. Credentials go in the ExternalSecret.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orders-web
+  namespace: orders
+  labels:
+    app.kubernetes.io/name: orders-web
+    app.kubernetes.io/part-of: orders
+data:
+  PODINFO_UI_MESSAGE: orders-web
+  PODINFO_LEVEL: info
