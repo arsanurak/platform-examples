@@ -80,7 +80,7 @@ def check_argocd(args):
 def check_kind(args):
     words = subcommands(args)
     if words and words[0] == "delete":
-        return "kind delete removes local clusters. Use make down"
+        return "kind delete removes local clusters. Ask the human to run it"
     return None
 
 

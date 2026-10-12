@@ -27,7 +27,7 @@ class SecretGuardTest(unittest.TestCase):
         self.assertIn("Secret guard", stderr)
 
     def test_allows_writing_ordinary_terraform(self):
-        code, _ = guard("Write", {"file_path": "iac/main.tf", "content": 'name = "app01"\n'})
+        code, _ = guard("Write", {"file_path": "iac/main.tf", "content": 'name = "orders-api"\n'})
         self.assertEqual(code, ALLOWED)
 
     def test_blocks_a_private_key_in_an_edit(self):
