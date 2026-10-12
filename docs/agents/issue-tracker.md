@@ -1,6 +1,6 @@
 # Issue tracker: GitHub
 
-Issues for this repo live in its own public GitHub Issues (`arsanurak/platform-demo`). Use the `gh` CLI; inside a clone it infers the repo from `git remote -v`.
+Issues for this repo live in its own public GitHub Issues (`arsanurak/platform-examples`). Use the `gh` CLI; inside a clone it infers the repo from `git remote -v`.
 
 Everything posted here is public. Follow the rules in `CLAUDE.md`: generic names and placeholders only.
 
@@ -17,7 +17,7 @@ Everything posted here is public. Follow the rules in `CLAUDE.md`: generic names
 
 - The **Map** is one parent issue that lists every ticket.
 - Tickets are linked to the map as GitHub sub-issues.
-- Blocking uses GitHub's native issue dependencies: `gh api --method POST repos/arsanurak/platform-demo/issues/<child>/dependencies/blocked_by -F issue_id=<blocker database id>`. Get the database id with `gh api repos/arsanurak/platform-demo/issues/<n> --jq .id`.
+- Blocking uses GitHub's native issue dependencies: `gh api --method POST repos/arsanurak/platform-examples/issues/<child>/dependencies/blocked_by -F issue_id=<blocker database id>`. Get the database id with `gh api repos/arsanurak/platform-examples/issues/<n> --jq .id`.
 - A ticket is ready when every ticket blocking it is closed. Take the first ready ticket in map order, and assign it to yourself before starting.
 
 ## Pull requests

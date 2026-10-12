@@ -1,6 +1,6 @@
 # platform-examples
 
-[![PR checks](https://github.com/arsanurak/platform-demo/actions/workflows/pr.yml/badge.svg?branch=main)](https://github.com/arsanurak/platform-demo/actions/workflows/pr.yml)
+[![PR checks](https://github.com/arsanurak/platform-examples/actions/workflows/pr.yml/badge.svg?branch=main)](https://github.com/arsanurak/platform-examples/actions/workflows/pr.yml)
 
 ## What this is
 
@@ -80,7 +80,7 @@ Scanner checks that don't fit example config are skipped inline, each with its r
 
 ## How this repo was built
 
-An agent (Claude Code) wrote most of this repo, one ticket and one pull request at a time, with a human reviewing each PR. [Issue #1](https://github.com/arsanurak/platform-demo/issues/1) is the map of the first build. [Issue #18](https://github.com/arsanurak/platform-demo/issues/18) turned the demo into example config. The decisions are recorded as ADRs in [`docs/adr/`](docs/adr/).
+An agent (Claude Code) wrote most of this repo, one ticket and one pull request at a time, with a human reviewing each PR. [Issue #1](https://github.com/arsanurak/platform-examples/issues/1) is the map of the first build. [Issue #18](https://github.com/arsanurak/platform-examples/issues/18) turned the demo into example config. The decisions are recorded as ADRs in [`docs/adr/`](docs/adr/).
 
 [`CLAUDE.md`](CLAUDE.md) holds the agent's rules for this public repo, and [`CONTEXT.md`](CONTEXT.md) the shared vocabulary. [`.claude/settings.json`](.claude/settings.json) runs two hooks before the agent's tool calls:
 

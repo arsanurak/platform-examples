@@ -1,4 +1,4 @@
-# platform-demo
+# platform-examples
 
 Public example configuration in a house style: how Terraform and GitOps files for an EKS platform are laid out, named and checked. Nothing here is applied or run; CI proves it statically.
 

@@ -1,4 +1,4 @@
-# platform-demo: agent instructions
+# platform-examples: agent instructions
 
 This repo is **public**. Everything you write here, including issues, commit messages and PR bodies, can be read by anyone.
 
@@ -30,7 +30,7 @@ If a hook blocks you, don't work around it. Explain to the human what you were t
 
 ### Issue tracker
 
-Issues live in this repo's GitHub Issues (`arsanurak/platform-demo`), handled with the `gh` CLI. See `docs/agents/issue-tracker.md`.
+Issues live in this repo's GitHub Issues (`arsanurak/platform-examples`), handled with the `gh` CLI. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
