@@ -1,0 +1,24 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "EksPodIdentityInTheStageCluster",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "pods.eks.amazonaws.com"
+      },
+      "Action": [
+        "sts:AssumeRole",
+        "sts:TagSession"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:SourceAccount": "000000000000"
+        },
+        "ArnEquals": {
+          "aws:SourceArn": "arn:aws:eks:eu-west-1:000000000000:cluster/stage"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadVolumesAndNodes",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeAvailabilityZones",
+        "ec2:DescribeInstances",
+        "ec2:DescribeSnapshots",
+        "ec2:DescribeTags",
+        "ec2:DescribeVolumes",
+        "ec2:DescribeVolumesModifications"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "eu-west-1"
+        }
+      }
+    },
+    {
+      "Sid": "AttachAndResizeVolumes",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:AttachVolume",
+        "ec2:DetachVolume",
+        "ec2:ModifyVolume"
+      ],
+      "Resource": [
+        "arn:aws:ec2:eu-west-1:000000000000:volume/*",
+        "arn:aws:ec2:eu-west-1:000000000000:instance/*"
+      ]
+    },
+    {
+      "Sid": "CreateVolumesTaggedForTheDriver",
+      "Effect": "Allow",
+      "Action": "ec2:CreateVolume",
+      "Resource": "arn:aws:ec2:eu-west-1:000000000000:volume/*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/ebs.csi.aws.com/cluster": "true"
+        }
+      }
+    },
+    {
+      "Sid": "CreateVolumesFromSnapshots",
+      "Effect": "Allow",
+      "Action": "ec2:CreateVolume",
+      "Resource": "arn:aws:ec2:eu-west-1::snapshot/*"
+    },
+    {
+      "Sid": "TagWhatItCreates",
+      "Effect": "Allow",
+      "Action": "ec2:CreateTags",
+      "Resource": [
+        "arn:aws:ec2:eu-west-1:000000000000:volume/*",
+        "arn:aws:ec2:eu-west-1::snapshot/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "ec2:CreateAction": [
+            "CreateVolume",
+            "CreateSnapshot"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "SnapshotItsOwnVolumes",
+      "Effect": "Allow",
+      "Action": "ec2:CreateSnapshot",
+      "Resource": [
+        "arn:aws:ec2:eu-west-1:000000000000:volume/*",
+        "arn:aws:ec2:eu-west-1::snapshot/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:ResourceTag/ebs.csi.aws.com/cluster": "true"
+        }
+      }
+    },
+    {
+      "Sid": "DeleteOnlyWhatItCreated",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DeleteSnapshot",
+        "ec2:DeleteVolume"
+      ],
+      "Resource": [
+        "arn:aws:ec2:eu-west-1:000000000000:volume/*",
+        "arn:aws:ec2:eu-west-1::snapshot/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:ResourceTag/ebs.csi.aws.com/cluster": "true"
+        }
+      }
+    },
+    {
+      "Sid": "GrantEc2UseOfTheKey",
+      "Effect": "Allow",
+      "Action": "kms:CreateGrant",
+      "Resource": "arn:aws:kms:eu-west-1:000000000000:key/*",
+      "Condition": {
+        "StringEquals": {
+          "kms:ViaService": "ec2.eu-west-1.amazonaws.com"
+        },
+        "Bool": {
+          "kms:GrantIsForAWSResource": "true"
+        }
+      }
+    },
+    {
+      "Sid": "UseTheKeyThroughEc2",
+      "Effect": "Allow",
+      "Action": [
+        "kms:Decrypt",
+        "kms:DescribeKey",
+        "kms:Encrypt",
+        "kms:GenerateDataKeyWithoutPlaintext",
+        "kms:ReEncryptFrom",
+        "kms:ReEncryptTo"
+      ],
+      "Resource": "arn:aws:kms:eu-west-1:000000000000:key/*",
+      "Condition": {
+        "StringEquals": {
+          "kms:ViaService": "ec2.eu-west-1.amazonaws.com"
+        }
+      }
+    }
+  ]
+}
