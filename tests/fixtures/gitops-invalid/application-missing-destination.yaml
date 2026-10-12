@@ -2,10 +2,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: app01
+  name: orders-api
   namespace: argocd
 spec:
   project: default
   source:
-    repoURL: https://github.com/example/platform-demo.git
-    path: gitops/clusters/old/app01
+    repoURL: https://github.com/arsanurak/platform-examples.git
+    path: gitops/orders/api

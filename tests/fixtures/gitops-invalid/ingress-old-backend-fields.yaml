@@ -1,0 +1,17 @@
+# networking.k8s.io/v1 has no serviceName/servicePort: the backend is service.name and service.port.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: orders-api
+  namespace: orders
+spec:
+  ingressClassName: alb
+  rules:
+    - host: orders-api.stage.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              serviceName: orders-api
+              servicePort: 80

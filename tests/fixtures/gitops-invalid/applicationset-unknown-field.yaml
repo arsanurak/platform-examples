@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: apps
+  name: services
   namespace: argocd
 spec:
   generator:
@@ -14,7 +14,7 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://github.com/example/platform-demo.git
+        repoURL: https://github.com/arsanurak/platform-examples.git
         path: gitops
       destination:
         server: https://kubernetes.default.svc
